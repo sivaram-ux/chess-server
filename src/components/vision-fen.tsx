@@ -48,8 +48,8 @@ export function VisionFen() {
       videoRef.current.srcObject = null;
     }
   }, []);
-
-  const startCamera = async () => {
+  
+  const requestCameraPermission = async () => {
     cleanupCamera();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -182,7 +182,7 @@ export function VisionFen() {
   const handleRetake = () => {
     setImageDataUrl(null);
     setError(null);
-    startCamera();
+    requestCameraPermission();
   };
 
   const copyFenToClipboard = () => {
@@ -300,7 +300,7 @@ export function VisionFen() {
           <div className="text-center animate-in fade-in zoom-in-95 duration-500">
             <h1 className="text-5xl font-bold font-headline text-primary">VisionFEN</h1>
             <p className="mt-4 text-lg text-muted-foreground">Get a FEN string from your chessboard in a snap.</p>
-            <Button size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={startCamera}>
+            <Button size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={requestCameraPermission}>
               <Camera className="mr-2 h-5 w-5" />
               Scan Chessboard
             </Button>
