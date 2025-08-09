@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Camera, Upload, RefreshCw, X, Copy } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 // TypeScript definition for Cropper.js from window object
 declare global {
@@ -31,6 +33,8 @@ export function VisionFen() {
   const [fen, setFen] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [ipAddress, setIpAddress] = useState<string>("10.147.210.166");
+  const [port, setPort] = useState<string>("8000");
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -139,7 +143,8 @@ export function VisionFen() {
       formData.append("file", blob, "chessboard.jpg");
 
       try {
-        const response = await fetch("http://10.147.210.166:8000/predict", {
+        const url = `http://${ipAddress}:${port}/predict`;
+        const response = await fetch(url, {
           method: "POST",
           body: formData,
         });
@@ -297,14 +302,38 @@ export function VisionFen() {
       case AppState.Idle:
       default:
         return (
-          <div className="text-center animate-in fade-in zoom-in-95 duration-500">
-            <h1 className="text-5xl font-bold font-headline text-primary">VisionFEN</h1>
-            <p className="mt-4 text-lg text-muted-foreground">Get a FEN string from your chessboard in a snap.</p>
-            <Button size="lg" className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90" onClick={requestCameraPermission}>
-              <Camera className="mr-2 h-5 w-5" />
-              Scan Chessboard
-            </Button>
-          </div>
+          <Card className="w-full max-w-lg shadow-xl animate-in fade-in zoom-in-95 duration-500">
+            <CardHeader className="text-center">
+              <h1 className="text-5xl font-bold font-headline text-primary">VisionFEN</h1>
+              <p className="mt-4 text-lg text-muted-foreground">Get a FEN string from your chessboard in a snap.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 mb-8">
+                <div>
+                  <Label htmlFor="ip-address">Server IP Address</Label>
+                  <Input
+                      id="ip-address"
+                      value={ipAddress}
+                      onChange={(e) => setIpAddress(e.target.value)}
+                      placeholder="e.g., 127.0.0.1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="port">Port</Label>
+                  <Input
+                      id="port"
+                      value={port}
+                      onChange={(e) => setPort(e.target.value)}
+                      placeholder="e.g., 8000"
+                  />
+                </div>
+              </div>
+              <Button size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" onClick={requestCameraPermission}>
+                <Camera className="mr-2 h-5 w-5" />
+                Scan Chessboard
+              </Button>
+            </CardContent>
+          </Card>
         );
     }
   };
