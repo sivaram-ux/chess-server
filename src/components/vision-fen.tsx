@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Upload, RefreshCw, X, Copy } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 // TypeScript definition for Cropper.js from window object
 declare global {
@@ -29,6 +30,7 @@ export function VisionFen() {
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [fen, setFen] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -51,6 +53,7 @@ export function VisionFen() {
     cleanupCamera();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      setHasCameraPermission(true);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
@@ -59,6 +62,7 @@ export function VisionFen() {
       }
     } catch (err) {
       console.error("Camera error:", err);
+      setHasCameraPermission(false);
       const errorMessage = "Could not access the camera. Please check permissions and try again.";
       setError(errorMessage);
       setAppState(AppState.Error);
@@ -172,6 +176,7 @@ export function VisionFen() {
     setFen(null);
     setError(null);
     setAppState(AppState.Idle);
+    setHasCameraPermission(null);
   };
 
   const handleRetake = () => {
@@ -202,6 +207,14 @@ export function VisionFen() {
               <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
                 <video ref={videoRef} className="h-full w-full object-cover" playsInline autoPlay />
               </div>
+               {hasCameraPermission === false && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertTitle>Camera Access Denied</AlertTitle>
+                  <AlertDescription>
+                    Please enable camera permissions in your browser settings to use this feature.
+                  </AlertDescription>
+                </Alert>
+              )}
               <div className="mt-4 flex justify-between">
                 <Button variant="outline" onClick={handleReset}><X className="mr-2 h-4 w-4" />Close</Button>
                 <Button className="bg-accent text-accent-foreground hover:bg-accent/90" onClick={handleCapture}><Camera className="mr-2 h-4 w-4" />Capture</Button>
